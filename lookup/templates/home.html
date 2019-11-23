@@ -3,39 +3,24 @@
 {% block content %}
 	
 	{% if api_json %}
+		
 		{% if api_json == "Error with API..." %}
 			There was an error with the API, please try again..
+			
 			{% elif aqi == "Error with getting data out of API..." %}
 			There was an error with getting the data, please try again..
+			
 		{% else %}
+			
 			<div class="jumbotron {{ category_color }}">
 				<h1 class="display-4"> {{ aqi }} </h1>
-				<p class="lead">Current {{api_json.data.city.name}} Air Quality: {{ api_json.data.aqi }}</p>
+				<p class="lead">{{api_json.data.city.name}}<br/>Air Quality: {{ api_json.data.aqi }}</p>
 				
 				<hr class="my-4">
-				{% if aqi == "Good" %}
-					<p>(0 - 50) - Air quality is considered satisfactory, and air pollution poses little or no risk.</p>
-					
-					{% elif aqi == "Moderate" %}
-					<p>(51 - 100) - Air quality is acceptable; however, for some pollutants there may be a moderate health concern for a very small number of people who are unusually sensitive to air pollution.</p>
-					
-					{% elif aqi == "Unhealthy for Sensitive Groups" %}
-					<p>(101 - 150) - Members of sensitive groups may experience health effects. The general public is not likely to be affected.</p>
-					
-					{% elif aqi == "Unhealthy" %}
-					<p>(151 - 200) - Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.</p>
-					
-					{% elif aqi == "Very Unhealthy" %}
-					<p>(201 - 300) - Health warnings of emergency conditions. The entire population is more likely to be affected.</p>
-					
-					{% elif aqi == "Hazardous" %}
-					<p>(300+) - Health alert: everyone may experience more serious health effects.</p>
-				{% endif %}
-				
+				<p> {{ status_description }}</p>
 			</div>
-			<br>
-			<!-- 			AQI: {{ api_json.data.aqi }}<br>
-			City: {{ api_json.data.city.name }} -->
+			
+			
 		{% endif %}
 	{% endif %}
 	
