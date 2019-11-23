@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from urllib.request import urlopen
 # Create your views here.
 # (Brains behind the scene with python.
 # Use python to reflect in our APP/WebPage)
@@ -52,15 +53,24 @@ def jumbotron(request, city):
     return render(request, 'home.html', {'api_json': api_json, 'aqi': aqi, "category_color": category_color, "status_description": status_description})
 
 
+def get_ip(request):
+    """Get visitor's IP from scraping a website"""
+    url = "".join(urlopen('https://ipapi.co').read().decode("utf-8")[3890:3965].split())
+    begin = url.find('h1>') + 3
+    end = url.find('</h1>')
+    ip = url[begin:end]
+    return ip
+
+
 def home(request):
-    """Home Page"""
-    # POST and GET (Brush up on HTML5 and CSS Forms)
+    """POST and GET requests (Brush up on HTML5 and CSS Forms)"""
     if request.method == "POST":
         city = request.POST['citylookup']
         return jumbotron(request, city)
 
     else:
-        city = "Amsterdam"
+        ip = get_ip(request)
+        city = urlopen(f"https://ipapi.co/{ip}/city").read().decode("utf-8")
         return jumbotron(request, city)
 
 
