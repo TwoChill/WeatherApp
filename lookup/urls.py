@@ -7,7 +7,7 @@ urlpatterns = [
     # 2. the actual HTML PAGE.
     # 3. to VIEWS (Brains behind the scene with python. Use python to reflect in our APP/WebPage)
     path('', views.home, name='home'),
-    path('aboutme.html', views.aboutme, name='aboutme'),
+    # path('aboutme.html', views.aboutme, name='aboutme'),
 
 
 

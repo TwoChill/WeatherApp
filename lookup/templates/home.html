@@ -7,16 +7,22 @@
 		{% if api_json == "Error with API..." %}
 			There was an error with the API, please try again..
 			
-			{% elif aqi == "Error with getting data out of API..." %}
-			There was an error with getting the data, please try again..
+			{% elif aqi == "An error as occurred!" %}
+			<div class="jumbotron {{ category_color }}">
+				<h1 class="display-6"> {{ aqi }} </h1>
+				<p class="lead">{{api_json.data.city.name}}{{ api_json.data.aqi }}</p>
+				
+				<hr class="my-6">
+				<p> {{ status_description }}</p>
+			</div>
 			
 		{% else %}
 			
 			<div class="jumbotron {{ category_color }}">
-				<h1 class="display-4"> {{ aqi }} </h1>
-				<p class="lead">{{api_json.data.city.name}}<br/>Air Quality: {{ api_json.data.aqi }}</p>
+				<h1 class="display-6"> {{ aqi }} </h1>
+				<p class="lead">{{api_json.data.city.name}} - Air Quality: {{ api_json.data.aqi }}</p>
 				
-				<hr class="my-4">
+				<hr class="my-6">
 				<p> {{ status_description }}</p>
 			</div>
 			
