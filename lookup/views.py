@@ -6,9 +6,10 @@ from urllib.request import urlopen
 
 
 def get_ip(request):
-    """Get visitor's IP from scraping a website"""
-    url = "".join(urlopen('https://ipapi.co').read().decode("utf-8")[3890:3965].split())
-    begin = url.find('h1>') + 3
+    """Get visitor's IP from scraping a certain website"""
+    url = "".join(
+        urlopen('https://ipapi.co').read().decode("utf-8")[3890:3965].split())
+    begin = url.find('<h1>') + 4
     end = url.find('</h1>')
     ip = url[begin:end]
     return ip
@@ -21,30 +22,38 @@ def home(request):
         return jumbotron(request, city)
 
     else:
+        """On GET request, get the visitor's local city's Air Quality"""
         ip = get_ip(request)
         city = urlopen(f"https://ipapi.co/{ip}/city").read().decode("utf-8")
         return jumbotron(request, city)
-
-
-def aboutme(request):
-    """About Me Page"""
-    return render(request, 'aboutme.html', {})
-
 
 def jumbotron(request, city):
     """Jumbotron"""
     import requests
 
     try:
-        api_json = requests.get("https://api.waqi.info/feed/" + city + "/?token=d4d75f4262bb8bf35993a20496b828b963580311").json()
+        api_json = requests.get("https://api.waqi.info/feed/" + city +
+                                "/?token=d4d75f4262bb8bf35993a20496b828b963580311").json()
 
-        try:
+        try:              
             if api_json['status'] == 'error':
                 aqi = "Error"
                 category_color = "error"
-                status_description = "No data seems to be available for {}.".format(city)
+                status_description = "No data seems to be available for {}.".format(
+                    city)
                 raise Exception
             else:
+                # Slices country name from the URL and tries to concatenate it.
+                url = api_json['data']['city']['url']
+                if len(url) > 23 + len(city):
+                    city = city.lower()
+                    country = url[(url.find('city') + 5):(url.find(city)) - 1]
+                    city = city.capitalize() + ", " + country.capitalize()
+                else:
+                    # If no country is given in URL.
+                    if len(url) == 23 + len(city):
+                        city = city.capitalize()
+                
                 # Gets Air Quality value from JSON file.
                 aqi = api_json['data']['aqi']
                 category_color = ''
@@ -78,6 +87,6 @@ def jumbotron(request, city):
             aqi = "An error as occurred!"
 
     except Exception as e:
-            api_json = "Error with API..."
+        api_json = "Error with API..."
 
-    return render(request, 'home.html', {'api_json': api_json, 'aqi': aqi, "category_color": category_color, "status_description": status_description})
+    return render(request, 'home.html', {'api_json': api_json, 'aqi': aqi, "category_color": category_color, "status_description": status_description, "city": city})
