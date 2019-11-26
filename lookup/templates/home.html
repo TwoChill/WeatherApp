@@ -5,7 +5,13 @@
 	{% if api_json %}
 		
 		{% if api_json == "Error with API..." %}
-			There was an error with the API, please try again..
+		<div class="jumbotron {{ category_color }}">
+			<h1 class="display-6"> {{ aqi }} </h1>
+			<p class="lead">{{api_json.data.city.name}}{{ api_json.data.aqi }}</p>
+			
+			<hr class="my-6">
+			<p> THIS BLOCK IS RUN</p>
+		</div>
 			
 			{% elif aqi == "An error as occurred!" %}
 			<div class="jumbotron {{ category_color }}">
@@ -19,13 +25,13 @@
 		{% else %}
 			
 			<div class="jumbotron {{ category_color }}">
-				<h1 class="display-6"> {{ aqi }} </h1>
-				<p class="lead">{{city}}, {{country}} - Air Quality: {{ api_json.data.aqi }}</p>
+				<p>Local time: {{localtime}} - {{date}}</p>
+				<h1 class="display-6"> Air is {{ aqi }} </h1>
+				<p class="lead">{{city}}, {{country}} - Air Quality Index: {{ api_json.data.aqi }}</p>
 				
 				<hr class="my-6">
 				<p> {{ status_description }}</p>
 			</div>
-			
 			
 		{% endif %}
 	{% endif %}
