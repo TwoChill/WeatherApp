@@ -5,6 +5,21 @@ from urllib.request import urlopen
 # Use python to reflect in our APP/WebPage)
 
 
+def home(request):
+    """POST and GET requests (Brush up on HTML5 and CSS Forms)"""
+    if request.method == "POST":
+        city = request.POST['citylookup']
+        city, country = get_weatherInfo(request, city)
+        return jumbotron(request, city, country)
+
+    else:
+        """On GET request, get the visitor's local city's Air Quality"""
+        ip = get_ip(request)
+        city = urlopen(f"https://ipapi.co/{ip}/city").read().decode("utf-8")
+        city, country = get_weatherInfo(request, city)
+        return jumbotron(request, city, country)
+
+
 def get_ip(request):
     """Get visitor's IP from scraping a certain website"""
     url = "".join(
@@ -15,27 +30,28 @@ def get_ip(request):
     return ip
 
 
-def home(request):
-    """POST and GET requests (Brush up on HTML5 and CSS Forms)"""
-    if request.method == "POST":
-        city = request.POST['citylookup']
-        return jumbotron(request, city)
+def get_weatherInfo(requests, city):
+    """Get weatherInfo from an other API"""
+    import requests
 
-    else:
-        """On GET request, get the visitor's local city's Air Quality"""
-        ip = get_ip(request)
-        city = urlopen(f"https://ipapi.co/{ip}/city").read().decode("utf-8")
-        return jumbotron(request, city)
+    api_json2 = requests.get(
+        "http://api.weatherstack.com/current?access_key=f4ec8c3283872a7de69e9ec1129bfebf&query=" + city).json()
 
-def jumbotron(request, city):
+    city = api_json2['location']['name']
+    country = api_json2['location']['country']
+    return city, country
+
+
+def jumbotron(request, city, country):
     """Jumbotron"""
     import requests
 
     try:
-        api_json = requests.get("https://api.waqi.info/feed/" + city +
-                                "/?token=d4d75f4262bb8bf35993a20496b828b963580311").json()
+        api_json = requests.get(
+            "https://api.waqi.info/feed/" + city + "/?token=d4d75f4262bb8bf35993a20496b828b963580311").json()
 
-        try:              
+        try:
+            # Create special error Jumbotron
             if api_json['status'] == 'error':
                 aqi = "Error"
                 category_color = "error"
@@ -43,21 +59,11 @@ def jumbotron(request, city):
                     city)
                 raise Exception
             else:
-                # Slices country name from the URL and tries to concatenate it.
-                url = api_json['data']['city']['url']
-                if len(url) > 23 + len(city):
-                    city = city.lower()
-                    country = url[(url.find('city') + 5):(url.find(city)) - 1]
-                    city = city.capitalize() + ", " + country.capitalize()
-                else:
-                    # If no country is given in URL.
-                    if len(url) == 23 + len(city):
-                        city = city.capitalize()
-                
                 # Gets Air Quality value from JSON file.
                 aqi = api_json['data']['aqi']
                 category_color = ''
 
+                # Alter state of Jumotron
                 if aqi <= 50:
                     aqi = "Good"
                     category_color = "good"
@@ -89,4 +95,8 @@ def jumbotron(request, city):
     except Exception as e:
         api_json = "Error with API..."
 
-    return render(request, 'home.html', {'api_json': api_json, 'aqi': aqi, "category_color": category_color, "status_description": status_description, "city": city})
+    return render(request, 'home.html', {'api_json': api_json,
+                                         'aqi': aqi,
+                                         "category_color": category_color,
+                                         "status_description": status_description,
+                                         "city": city, "country": country})
