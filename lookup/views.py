@@ -9,15 +9,15 @@ def home(request):
     """POST and GET requests (Brush up on HTML5 and CSS Forms)"""
     if request.method == "POST":
         city = request.POST['citylookup']
-        city, country = get_weatherInfo(request, city)
-        return jumbotron(request, city, country)
+        city, country, localtime, date = get_weatherInfo(request, city)
+        return jumbotron(request, city, country, localtime, date)
 
     else:
         """On GET request, get the visitor's local city's Air Quality"""
         ip = get_ip(request)
         city = urlopen(f"https://ipapi.co/{ip}/city").read().decode("utf-8")
-        city, country = get_weatherInfo(request, city)
-        return jumbotron(request, city, country)
+        city, country, localtime, date = get_weatherInfo(request, city)
+        return jumbotron(request, city, country, localtime, date)
 
 
 def get_ip(request):
@@ -33,16 +33,23 @@ def get_ip(request):
 def get_weatherInfo(requests, city):
     """Get weatherInfo from an other API"""
     import requests
+    import datetime
 
-    api_json2 = requests.get(
-        "http://api.weatherstack.com/current?access_key=f4ec8c3283872a7de69e9ec1129bfebf&query=" + city).json()
+    try:
+        api_json2 = requests.get(
+            "http://api.weatherstack.com/current?access_key=f4ec8c3283872a7de69e9ec1129bfebf&query=" + city).json()
+        city = api_json2['location']['name']
+        country = api_json2['location']['country']
+        localtime = api_json2['location']['localtime'].split()[1]
+        date = api_json2['location']['localtime'].split()[0]
 
-    city = api_json2['location']['name']
-    country = api_json2['location']['country']
-    return city, country
+        return city, country, localtime, date
+
+    except Exception as e:
+        return city, city, city, city
 
 
-def jumbotron(request, city, country):
+def jumbotron(request, city, country, localtime, date):
     """Jumbotron"""
     import requests
 
@@ -96,7 +103,8 @@ def jumbotron(request, city, country):
         api_json = "Error with API..."
 
     return render(request, 'home.html', {'api_json': api_json,
-                                         'aqi': aqi,
-                                         "category_color": category_color,
+                                         'aqi': aqi, "category_color": category_color,
                                          "status_description": status_description,
-                                         "city": city, "country": country})
+                                         "city": city, "country": country,
+                                         "localtime": localtime, "date": date
+                                         })
