@@ -7,17 +7,39 @@ from urllib.request import urlopen
 
 def home(request):
     """POST and GET requests (Brush up on HTML5 and CSS Forms)"""
+    page = 'home'
+
     if request.method == "POST":
         city = request.POST['citylookup']
-        city, country, localtime, date = get_weatherInfo(request, city)
-        return jumbotron(request, city, country, localtime, date)
+        city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir = get_weatherInfo(
+            request, city)
+        return jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir)
 
     else:
         """On GET request, get the visitor's local city's Air Quality"""
         ip = get_ip(request)
         city = urlopen(f"https://ipapi.co/{ip}/city").read().decode("utf-8")
-        city, country, localtime, date = get_weatherInfo(request, city)
-        return jumbotron(request, city, country, localtime, date)
+        city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir = get_weatherInfo(
+            request, city)
+        return jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir)
+
+
+def temperature(request):
+    """ Jumbotron for Current weather information """
+    page = 'temperature'
+
+    if request.method == "POST":
+        city = request.POST['citylookup']
+        city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir = get_weatherInfo(
+            request, city)
+        return jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir)
+    else:
+        """On GET request, get the visitor's local city's Air Quality"""
+        ip = get_ip(request)
+        city = urlopen(f"https://ipapi.co/{ip}/city").read().decode("utf-8")
+        city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir = get_weatherInfo(
+            request, city)
+        return jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir)
 
 
 def get_ip(request):
@@ -33,23 +55,66 @@ def get_ip(request):
 def get_weatherInfo(requests, city):
     """Get weatherInfo from an other API"""
     import requests
-    import datetime
 
     try:
         api_json2 = requests.get(
             "http://api.weatherstack.com/current?access_key=f4ec8c3283872a7de69e9ec1129bfebf&query=" + city).json()
         city = api_json2['location']['name']
         country = api_json2['location']['country']
-        localtime = api_json2['location']['localtime'].split()[1]
-        date = api_json2['location']['localtime'].split()[0]
+        obsrvtime = api_json2['current']['observation_time']
+        date = '-'.join(api_json2['location']
+                        ['localtime'][:11].strip().split('-')[::-1])
+        temp = str(api_json2['current']['temperature'])
+        w_description = api_json2['current']['weather_descriptions']
+        feelslike = api_json2['current']['feelslike']
+        precip = api_json2['current']['precip']
+        visibility = api_json2['current']['visibility']
+        wind_speed = api_json2['current']['wind_speed']
+        wind_degree = str(api_json2['current']['wind_degree']) + '°'
 
-        return city, country, localtime, date
+        wind_dir = api_json2['current']['wind_dir']
+
+        # Make two list an used the zip function
+        if wind_dir == 'S':
+            wind_dir = 'South'
+        elif wind_dir == 'SSE':
+            wind_dir = 'South / South East'
+        elif wind_dir == 'SE':
+            wind_dir = 'South East'
+        elif wind_dir == 'ESE':
+            wind_dir = 'East / South East'
+        elif wind_dir == 'E':
+            wind_dir = 'East'
+        elif wind_dir == 'ENE':
+            wind_dir = 'East / North East'
+        elif wind_dir == 'NE':
+            wind_dir = 'North East'
+        elif wind_dir == 'NNE':
+            wind_dir = 'Norht / North East'
+        elif wind_dir == 'N':
+            wind_dir = 'North'
+        elif wind_dir == 'NNW':
+            wind_dir = 'North / North West'
+        elif wind_dir == 'NW':
+            wind_dir = 'Nort West'
+        elif wind_dir == 'WNW':
+            wind_dir = 'West / North West'
+        elif wind_dir == 'W':
+            wind_dir = 'West'
+        elif wind_dir == 'WSW':
+            wind_dir = 'West / South West'
+        elif wind_dir == 'SW':
+            wind_dir = 'South West'
+        elif wind_dir == 'SSW':
+            wind_dir = 'South / South West'
+
+        return city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir
 
     except Exception as e:
-        return city, city, city, city
+        return city, country, "No Time Availible", "No Date Availible", "No Temp. Availible", w_description, "No Temp. Availible", percip, visibility, wind_speed, wind_degree, "No Wind Direction Availible"
 
-
-def jumbotron(request, city, country, localtime, date):
+# !!! Oke, this is getting ridiculous! There must be some technique I'm missing. Like *args or something
+def jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir):
     """Jumbotron"""
     import requests
 
@@ -97,14 +162,27 @@ def jumbotron(request, city, country, localtime, date):
                     status_description = "(300+) - Health alert: everyone may experience more serious health effects!!"
 
         except Exception as e:
-            aqi = "An error as occurred!"
+            aqi = "An error has occurred!"
 
     except Exception as e:
         api_json = "Error with API..."
 
-    return render(request, 'home.html', {'api_json': api_json,
-                                         'aqi': aqi, "category_color": category_color,
-                                         "status_description": status_description,
-                                         "city": city, "country": country,
-                                         "localtime": localtime, "date": date
-                                         })
+    if page == 'home':
+        return render(request, 'home.html', {'api_json': api_json,
+                                            'aqi': aqi, "category_color": category_color,
+                                            "status_description": status_description,
+                                            "city": city, "country": country,
+                                            "obsrvtime": obsrvtime, "date": date,
+                                            })
+    # Might make other pages with diffrent dict values.
+    elif page in ('temperature'):
+        return render(request, f'{page}.html', {'api_json': api_json,
+                                            'aqi': aqi, "category_color": category_color,
+                                            "status_description": status_description,
+                                            "city": city, "country": country,
+                                            "obsrvtime": obsrvtime, "date": date, "temp": temp,
+                                            "w_description": w_description, "feelslike": feelslike,
+                                            "precip": precip, "visibility": visibility,
+                                            "wind_speed": wind_speed, "wind_degree": wind_degree,
+                                            "wind_dir": wind_dir
+                                            })

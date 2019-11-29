@@ -5,28 +5,29 @@
 	{% if api_json %}
 		
 		{% if api_json == "Error with API..." %}
+		<!-- If an error occurs with the AO -->
 		<div class="jumbotron {{ category_color }}">
 			<h1 class="display-6"> {{ aqi }} </h1>
 			<p class="lead">{{api_json.data.city.name}}{{ api_json.data.aqi }}</p>
 			
 			<hr class="my-6">
-			<p> THIS BLOCK IS RUN</p>
+			<p> ERROR WITH API</p>
 		</div>
 			
-			{% elif aqi == "An error as occurred!" %}
+			{% elif aqi == "An error has occurred!" %}
 			<div class="jumbotron {{ category_color }}">
 				<h1 class="display-6"> {{ aqi }} </h1>
 				<p class="lead">{{api_json.data.city.name}}{{ api_json.data.aqi }}</p>
 				
 				<hr class="my-6">
-				<p> {{ status_description }}</p>
+				<p>An Error has occurred</p>
 			</div>
 			
 		{% else %}
 			
 			<div class="jumbotron {{ category_color }}">
-				<p>Local time: {{localtime}} - {{date}}</p>
-				<h1 class="display-6"> Air is {{ aqi }} </h1>
+				<p>Observation time: {{obsrvtime}} - {{date}}</p>
+				<h1 class="display-6"> Air Quality is {{ aqi }} </h1>
 				<p class="lead">{{city}}, {{country}} - Air Quality Index: {{ api_json.data.aqi }}</p>
 				
 				<hr class="my-6">
