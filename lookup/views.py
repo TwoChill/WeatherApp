@@ -24,24 +24,6 @@ def home(request):
         return jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir)
 
 
-def temperature(request):
-    """ Jumbotron for Current weather information """
-    page = 'temperature'
-
-    if request.method == "POST":
-        city = request.POST['citylookup']
-        city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir = get_weatherInfo(
-            request, city)
-        return jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir)
-    else:
-        """On GET request, get the visitor's local city's Air Quality"""
-        ip = get_ip(request)
-        city = urlopen(f"https://ipapi.co/{ip}/city").read().decode("utf-8")
-        city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir = get_weatherInfo(
-            request, city)
-        return jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir)
-
-
 def get_ip(request):
     """Get visitor's IP from scraping a certain website"""
     url = "".join(
@@ -114,6 +96,8 @@ def get_weatherInfo(requests, city):
         return city, country, "No Time Availible", "No Date Availible", "No Temp. Availible", w_description, "No Temp. Availible", percip, visibility, wind_speed, wind_degree, "No Wind Direction Availible"
 
 # !!! Oke, this is getting ridiculous! There must be some technique I'm missing. Like *args or something
+
+
 def jumbotron(request, page, city, country, obsrvtime, date, temp, w_description, feelslike, precip, visibility, wind_speed, wind_degree, wind_dir):
     """Jumbotron"""
     import requests
@@ -167,16 +151,7 @@ def jumbotron(request, page, city, country, obsrvtime, date, temp, w_description
     except Exception as e:
         api_json = "Error with API..."
 
-    if page == 'home':
-        return render(request, 'home.html', {'api_json': api_json,
-                                            'aqi': aqi, "category_color": category_color,
-                                            "status_description": status_description,
-                                            "city": city, "country": country,
-                                            "obsrvtime": obsrvtime, "date": date,
-                                            })
-    # Might make other pages with diffrent dict values.
-    elif page in ('temperature'):
-        return render(request, f'{page}.html', {'api_json': api_json,
+    return render(request, f'{page}.html', {'api_json': api_json,
                                             'aqi': aqi, "category_color": category_color,
                                             "status_description": status_description,
                                             "city": city, "country": country,
