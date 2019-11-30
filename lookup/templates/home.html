@@ -1,41 +1,67 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	
-	{% if api_json %}
-		
-		{% if api_json == "Error with API..." %}
-		<!-- If an error occurs with the AO -->
-		<div class="jumbotron {{ category_color }}">
-			<h1 class="display-6"> {{ aqi }} </h1>
-			<p class="lead">{{api_json.data.city.name}}{{ api_json.data.aqi }}</p>
-			
-			<hr class="my-6">
-			<p> ERROR WITH API</p>
+
+{% if api_json %}
+
+{% if api_json == "Error with API..." %}
+<!-- If an error occurs with the AO -->
+<div class="jumbotron {{ category_color }}">
+	<h1 class="display-6"> {{ aqi }} </h1>
+	<p class="lead">{{api_json.data.city.name}}{{ api_json.data.aqi }}</p>
+
+	<hr class="my-6">
+	<p> ERROR WITH API</p>
+</div>
+
+{% elif aqi == "An error has occurred!" %}
+<div class="jumbotron {{ category_color }}">
+	<h1 class="display-6"> {{ aqi }} </h1>
+	<p class="lead">{{api_json.data.city.name}}{{ api_json.data.aqi }}</p>
+
+	<hr class="my-6">
+	<p>An Error has occurred</p>
+</div>
+
+{% else %}
+
+<div class="jumbotron {{ category_color }}">
+	<p>Observation time: {{obsrvtime}} - {{date}}</p>
+	<h1 class="display-6"> Air Quality is {{ aqi }} </h1>
+	<p class="lead">{{city}}, {{country}} - Air Quality Index: {{ api_json.data.aqi }}</p>
+
+	<hr class="my-6">
+	<p> {{ status_description }}</p>
+</div>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-outline-secondary" data-toggle="modal"
+	data-target="#exampleModalCenter">
+	Temperature
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+	aria-labelledby="exampleModalCenterTitle"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content {{ category_color }}">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLongTitle">Temperature</h5>
+				</button>
+			</div>
+			<div class="modal-body">
+				Temperature in {{city}} is {{temp}}°C.<br>
+				It'll feel like it's {{feelslike}}°C.
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
 		</div>
-			
-			{% elif aqi == "An error has occurred!" %}
-			<div class="jumbotron {{ category_color }}">
-				<h1 class="display-6"> {{ aqi }} </h1>
-				<p class="lead">{{api_json.data.city.name}}{{ api_json.data.aqi }}</p>
-				
-				<hr class="my-6">
-				<p>An Error has occurred</p>
-			</div>
-			
-		{% else %}
-			
-			<div class="jumbotron {{ category_color }}">
-				<p>Observation time: {{obsrvtime}} - {{date}}</p>
-				<h1 class="display-6"> Air Quality is {{ aqi }} </h1>
-				<p class="lead">{{city}}, {{country}} - Air Quality Index: {{ api_json.data.aqi }}</p>
-				
-				<hr class="my-6">
-				<p> {{ status_description }}</p>
-			</div>
-			
-		{% endif %}
-	{% endif %}
-	
-	
+	</div>
+</div>
+
+{% endif %}
+{% endif %}
+
+
 {% endblock %}
